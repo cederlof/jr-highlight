@@ -14,7 +14,7 @@ Johann Burkard
 
 */
 !function($) {
-	$.fn.highlight = function(pat, ignore) {
+	$.fn.highlight = function(pat, ignore, skipClasses) {
 		function replaceDiacritics(str) {
 			var diacritics = [ [ /[\u00c0-\u00c6]/g, 'A' ],
 				[ /[\u00e0-\u00e6]/g, 'a' ],
@@ -65,15 +65,23 @@ Johann Burkard
 						skip = 1;
 					}
 				}
-			} else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
+			} else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName) && !hasSkippedClass(node)) {
 				for (var i = 0; i < node.childNodes.length; ++i) {
 					i += innerHighlight(node.childNodes[i], pat, ignore);
 				}
 			}
 			return skip;
 		}
+
+		function hasSkippedClass(node) {
+		    return $(skipClasses).is(function (i) {
+		        return $(node).hasClass(skipClasses[i]);
+		    });
+		}
+		
 		return this.length && pat && pat.length ? this.each(function() {
-			ignore = typeof ignore !== 'undefined' ? ignore : $.fn.highlight.defaults.ignore;
+			ignore = typeof ignore !== 'undefined' && ignore != null ? ignore : $.fn.highlight.defaults.ignore;
+            skipClasses = typeof skipClasses !== 'undefined' && ignore != null ? skipClasses : [];
 			innerHighlight(this, pat, ignore);
 		}) : this;
 	};
